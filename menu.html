@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>菜單｜Moonlight Café</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">Moonlight Café</div>
+    <nav>
+      <a href="index.html">首頁</a>
+      <a href="menu.html" class="active">菜單</a>
+      <a href="about.html">關於我們</a>
+    </nav>
+  </header>
+
+  <main class="menu">
+    <h2>我們的菜單</h2>
+    <div class="menu-grid" id="menuGrid">
+    載入中...
+  </div>
+  </main>
+  
+  <!-- 商品詳細浮層 -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">✕</button>
+
+    <div class="modal-content">
+      <div class="modal-image">
+        <img id="modalImg" src="" alt="">
+      </div>
+      <div class="modal-text">
+        <h3 id="modalTitle"></h3>
+        <p id="modalPrice"></p>
+        <p id="modalDesc"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <footer class="footer">
+    <p>📞 04-12345678｜📍 台灣某個溫暖角落</p>
+    <p>© 2026 Moonlight Café</p>
+  </footer>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  const modal = document.getElementById("productModal");
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEKrtUed8tzL1s072W9eWrTfT1RXfkOKA",
+    authDomain: "test01-dd13e.firebaseapp.com",
+    projectId: "test01-dd13e",
+    storageBucket: "test01-dd13e.firebasestorage.app",
+    messagingSenderId: "262581605790",
+    appId: "1:262581605790:web:456fcca5091299e285728f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function fetchMenu() {
+    const grid = document.getElementById("menuGrid");
+
+    try {
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+
+      grid.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const item = doc.data();
+
+        const imgUrl =
+          item.imageUrls && item.imageUrls.length > 0
+            ? item.imageUrls[0]
+            : "https://via.placeholder.com/300";
+
+        const card = document.createElement("div");
+        card.className = "menu-item";
+
+        card.innerHTML = `
+          <div class="menu-img"
+            style="background-image:url('${imgUrl}');
+                  background-size:cover;
+                  background-position:center;">
+          </div>
+          <p><strong>${item.name}</strong></p>
+          <p class="menu-desc">${item.description || ""}</p>
+          <span class="more">...more</span>
+        `;
+
+        card.addEventListener("click", () => openModal(item));
+
+        grid.appendChild(card);
+      });
+
+
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = "菜單載入失敗，請稍後再試";
+    }
+  }
+
+  function openModal(item) {
+  document.getElementById("modalImg").src =
+    item.imageUrls?.[0] || "https://via.placeholder.com/300";
+  document.getElementById("modalTitle").innerText = item.name;
+  document.getElementById("modalPrice").innerText = `NT$ ${item.price}`;
+  document.getElementById("modalDesc").innerHTML =
+    (item.description || "").replace(/\n/g, "<br>");
+    modal.classList.add("active");
+  }
+
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", e => {
+    if (e.target === modal) closeModal();
+  });
+
+  function closeModal() {
+  modal.classList.remove("active");
+}
+  fetchMenu();
+</script>
+
+</body>
+</html>
