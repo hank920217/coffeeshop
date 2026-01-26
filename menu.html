@@ -18,6 +18,7 @@
 
   <main class="menu">
     <h2>我們的菜單</h2>
+    <div id="tagFilter" style="text-align:center; margin-bottom:20px;"></div>
     <div class="menu-grid" id="menuGrid">
     載入中...
   </div>
@@ -48,83 +49,151 @@
   </footer>
 
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  const modal = document.getElementById("productModal");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAEKrtUed8tzL1s072W9eWrTfT1RXfkOKA",
-    authDomain: "test01-dd13e.firebaseapp.com",
-    projectId: "test01-dd13e",
-    storageBucket: "test01-dd13e.firebasestorage.app",
-    messagingSenderId: "262581605790",
-    appId: "1:262581605790:web:456fcca5091299e285728f"
+const modal = document.getElementById("productModal");
+const grid = document.getElementById("menuGrid");
+const tagFilter = document.getElementById("tagFilter");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEKrtUed8tzL1s072W9eWrTfT1RXfkOKA",
+  authDomain: "test01-dd13e.firebaseapp.com",
+  projectId: "test01-dd13e",
+  storageBucket: "test01-dd13e.firebasestorage.app",
+  messagingSenderId: "262581605790",
+  appId: "1:262581605790:web:456fcca5091299e285728f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allItems = [];
+let activeTag = null;
+
+/* ========= 抓資料 ========= */
+async function fetchMenu() {
+  try {
+    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+
+    allItems = [];
+    const tagSet = new Set();
+
+    snapshot.forEach(doc => {
+      const item = doc.data();
+      allItems.push(item);
+      (item.keywords || []).forEach(k => tagSet.add(k));
+    });
+
+    renderTags([...tagSet]);
+    renderMenu(allItems);
+
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = "菜單載入失敗，請稍後再試";
+  }
+}
+
+/* ========= 產生標籤 ========= */
+function renderTags(tags) {
+  tagFilter.innerHTML = "";
+
+  const allBtn = document.createElement("button");
+  allBtn.textContent = "全部";
+  allBtn.style.margin = "5px";
+  allBtn.onclick = () => {
+    activeTag = null;
+
+    document
+      .querySelectorAll("#tagFilter button")
+      .forEach(b => b.classList.remove("active"));
+    allBtn.classList.add("active");
+
+    renderMenu(allItems);
   };
+  tagFilter.appendChild(allBtn);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  tags.forEach(tag => {
+    const btn = document.createElement("button");
+    btn.textContent = `#${tag}`;
+    btn.style.margin = "5px";
 
-  async function fetchMenu() {
-    const grid = document.getElementById("menuGrid");
+    btn.onclick = () => {
+  activeTag = tag;
 
-    try {
-      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
+  document
+    .querySelectorAll("#tagFilter button")
+    .forEach(b => b.classList.remove("active"));
 
-      grid.innerHTML = "";
+  btn.classList.add("active");
 
-      snapshot.forEach(doc => {
-        const item = doc.data();
-
-        const imgUrl =
-          item.imageUrls && item.imageUrls.length > 0
-            ? item.imageUrls[0]
-            : "https://via.placeholder.com/300";
-
-        const card = document.createElement("div");
-        card.className = "menu-item";
-
-        card.innerHTML = `
-          <div class="menu-img"
-            style="background-image:url('${imgUrl}');
-                  background-size:cover;
-                  background-position:center;">
-          </div>
-          <p><strong>${item.name}</strong></p>
-        `;
-
-        card.addEventListener("click", () => openModal(item));
-
-        grid.appendChild(card);
-      });
+  const filtered = allItems.filter(item =>
+    (item.keywords || []).includes(tag)
+  );
+  renderMenu(filtered);
+};
 
 
-    } catch (err) {
-      console.error(err);
-      grid.innerHTML = "菜單載入失敗，請稍後再試";
-    }
+    tagFilter.appendChild(btn);
+  });
+}
+
+/* ========= 渲染卡片 ========= */
+function renderMenu(items) {
+  grid.innerHTML = "";
+
+  if (items.length === 0) {
+    grid.innerHTML = "沒有符合的商品";
+    return;
   }
 
-  function openModal(item) {
+  items.forEach(item => {
+    const imgUrl =
+      item.imageUrls && item.imageUrls.length > 0
+        ? item.imageUrls[0]
+        : "https://via.placeholder.com/300";
+
+    const card = document.createElement("div");
+    card.className = "menu-item";
+
+    card.innerHTML = `
+      <div class="menu-img"
+        style="background-image:url('${imgUrl}');
+              background-size:cover;
+              background-position:center;">
+      </div>
+      <p><strong>${item.name}</strong></p>
+    `;
+
+    card.addEventListener("click", () => openModal(item));
+    grid.appendChild(card);
+  });
+}
+
+/* ========= Modal ========= */
+function openModal(item) {
   document.getElementById("modalImg").src =
     item.imageUrls?.[0] || "https://via.placeholder.com/300";
   document.getElementById("modalTitle").innerText = item.name;
   document.getElementById("modalPrice").innerText = `NT$ ${item.price}`;
   document.getElementById("modalDesc").innerHTML =
     (item.description || "").replace(/\n/g, "<br>");
-    modal.classList.add("active");
-  }
+  modal.classList.add("active");
+}
 
-  document.getElementById("modalClose").addEventListener("click", closeModal);
-  modal.addEventListener("click", e => {
-    if (e.target === modal) closeModal();
-  });
+document.getElementById("modalClose").addEventListener("click", closeModal);
+modal.addEventListener("click", e => {
+  if (e.target === modal) closeModal();
+});
 
-  function closeModal() {
+function closeModal() {
   modal.classList.remove("active");
 }
-  fetchMenu();
+
+/* ========= 啟動 ========= */
+fetchMenu();
 </script>
 
 </body>
