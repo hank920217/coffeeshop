@@ -181,7 +181,6 @@ main {
 
 .menu-desc {
   display: -webkit-box;
-  -webkit-line-clamp: 2;   /* 顯示 2 行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -262,14 +261,99 @@ main {
   flex: 1;
 }
 
-/* 手機版 */
+
+
+/* ===== 標籤篩選玻璃按鈕 ===== */
+#tagFilter button {
+  padding: 8px 16px;
+  margin: 6px;
+  border-radius: 999px; /* 完全圓角 */
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  color: #3b2f2f; /* 咖啡色字 */
+  font-size: 14px;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+/* hover 效果 */
+#tagFilter button:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 點擊中的狀態（可選） */
+#tagFilter button.active {
+  background: rgba(120, 90, 70, 0.5);
+  color: #fff;
+  font-weight: 600;
+
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.4),
+      0 8px 20px rgba(0, 0, 0, 0.25);
+
+    transform: scale(1.05);
+  }
+
+  /* 手機版 */
 @media (max-width: 768px) {
+  .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+  .modal-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  width: 90%;
+  max-height: 93vh;        /* ⭐ 手機關鍵 */
+  overflow: hidden;       /* 卡片本身不滾 */
+}
+
   .modal-content {
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;       /* ⭐ 滑動發生在這 */
+  max-height: 90vh;
+  -webkit-overflow-scrolling: touch; /* iOS 滑動順 */
   }
 
   .modal-image img {
-    width: 100%;
+  width: 100%;
+  max-height: 40vh;
+  object-fit: cover;
+  border-radius: 12px;
+  }
+  .modal-card {
+  animation: slideUp 0.25s ease;
+}
+
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
