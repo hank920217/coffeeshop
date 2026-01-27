@@ -261,6 +261,24 @@ main {
   flex: 1;
 }
 
+.skeleton-card {
+  height: 260px;
+  border-radius: 12px;
+  background: linear-gradient(
+    100deg,
+    #e6e0d8 40%,
+    #f3eee8 50%,
+    #e6e0d8 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton {
+  to {
+    background-position: -200% 0;
+  }
+}
 
 
 /* ===== 標籤篩選玻璃按鈕 ===== */
