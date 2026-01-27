@@ -65,29 +65,51 @@ main {
 
 /* 首頁 */
 .hero {
+  position: relative; /* 必須有，讓 ::before 能定位 */
   height: 60vh;
-  background: rgba(200, 200, 200, 0.6);
-  backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(210, 190, 170, 0.6);
-  backdrop-filter: blur(5px);
+  overflow: hidden; /* 避免 ::before 超出 */
 }
-
 .hero-content {
+  position: relative; /* 文字置於 ::before 上方 */
+  z-index: 1;
   text-align: center;
 }
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  background-image: url("../img/shop.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  transform: scale(1.1); /* 模糊會縮小，放大補償 */
+  z-index: 0;
+}
+/* .hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 0;
+} */
+
+
 
 .hero h1 {
+  color: rgb(254, 223, 131);
   font-size: 3rem;
   margin-bottom: 20px;
 }
 
+
+
 .btn {
   padding: 10px 25px;
-  background: #333;
-  color: #fff;
+  background: #f6b84d;
+  color: #000000;
   text-decoration: none;
   transition: background 0.3s;
 }
