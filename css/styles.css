@@ -88,15 +88,6 @@ main {
   transform: scale(1.1); /* 模糊會縮小，放大補償 */
   z-index: 0;
 }
-/* .hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 0;
-} */
-
-
 
 .hero h1 {
   color: rgb(254, 223, 131);
