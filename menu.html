@@ -20,8 +20,11 @@
     <h2>我們的菜單</h2>
     <div id="tagFilter" style="text-align:center; margin-bottom:20px;"></div>
     <div class="menu-grid" id="menuGrid">
-    載入中...
-  </div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+
   </main>
   
   <!-- 商品詳細浮層 -->
@@ -49,9 +52,20 @@
   </footer>
 
   <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, orderBy } 
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  const TAG_MAP = {
+    peripheralproducts: "周邊商品",
+    Chocolate: "巧克力飲品",
+    coffee: "咖啡",
+    dessert: "甜點",
+    TeaLatteSelection: "茶與拿鐵",
+    CaffeineFree: "無咖啡因飲品",
+    SparklingSoda: "氣泡飲品",
+    TaiwaneseSpecialities: "台灣特色飲品"
+  };
 
 const modal = document.getElementById("productModal");
 const grid = document.getElementById("menuGrid");
@@ -117,7 +131,7 @@ function renderTags(tags) {
 
   tags.forEach(tag => {
     const btn = document.createElement("button");
-    btn.textContent = `#${tag}`;
+    btn.textContent = `#${TAG_MAP[tag] || tag}`;
     btn.style.margin = "5px";
 
     btn.onclick = () => {
