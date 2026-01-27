@@ -9,10 +9,11 @@
 <body>
   <header class="navbar">
     <div class="logo">Moonlight Café</div>
-    <nav>
+    <nav class="nav">
       <a href="index.html" class="active">首頁</a>
-      <a href="menu.html">菜單</a>
-      <a href="about.html">關於我們</a>
+      <a href="menu.html" >菜單</a>
+      <a href="about.html" >關於我們</a>
+      <span class="nav-indicator"></span>
     </nav>
   </header>
 
@@ -36,6 +37,35 @@
     <p>📞 04-12345678｜📍 台灣某個溫暖角落</p>
     <p>© 2026 Moonlight Café</p>
   </footer>
+  <script>
+    const nav = document.querySelector(".nav");
+    const indicator = document.querySelector(".nav-indicator");
+    const links = nav.querySelectorAll("a");
+
+    function moveIndicator(el) {
+      const rect = el.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+
+      indicator.style.width = rect.width + "px";
+      indicator.style.left = rect.left - navRect.left + "px";
+    }
+
+    // 初始化：指到 active
+    const activeLink = nav.querySelector(".active");
+    if (activeLink) moveIndicator(activeLink);
+
+    // hover 效果
+    links.forEach(link => {
+      link.addEventListener("mouseenter", () => {
+        moveIndicator(link);
+      });
+    });
+
+    // 滑鼠離開 nav → 回到 active
+    nav.addEventListener("mouseleave", () => {
+      if (activeLink) moveIndicator(activeLink);
+    });
+  </script>
 </body>
 </html>
 

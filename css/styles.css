@@ -319,6 +319,29 @@ main {
     transform: scale(1.05);
   }
 
+  .nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav a {
+  position: relative;
+  padding: 4px 0;
+}
+
+/* 底線本體 */
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: #333;
+  transition: all 0.3s ease;
+  width: 0;
+  left: 0;
+}
+
+
   /* 手機版 */
 @media (max-width: 768px) {
   .modal-overlay {
