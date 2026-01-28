@@ -13,6 +13,18 @@ const TAG_MAP = {
   TaiwaneseSpecialities: "台灣特色飲品"
 };
 
+/* ========= 標籤優先順序 (數值越小越前面) ========= */
+const TAG_PRIORITY = {
+  "coffee": 1,
+  "TeaLatteSelection": 2,
+  "Chocolate": 3,
+  "SparklingSoda": 4,
+  "TaiwaneseSpecialities": 5,
+  "CaffeineFree": 6,
+  "dessert": 7,
+  "peripheralproducts": 8
+};
+
 const firebaseConfig = {
   apiKey: "AIzaSyAEKrtUed8tzL1s072W9eWrTfT1RXfkOKA",
   authDomain: "test01-dd13e.firebaseapp.com",
@@ -62,6 +74,24 @@ async function fetchMenu() {
       (item.keywords || []).forEach(k => tagSet.add(k));
     });
 
+    // --- 依照標籤優先權排序商品 ---
+    allItems.sort((a, b) => {
+      const getPriority = (item) => {
+        if (!item.keywords || item.keywords.length === 0) return 99;
+        // 找出該商品所有標籤中，優先權數值最小 (最優先) 的
+        const priorities = item.keywords.map(k => TAG_PRIORITY[k] || 99);
+        return Math.min(...priorities);
+      };
+
+      const pA = getPriority(a);
+      const pB = getPriority(b);
+      
+      if (pA !== pB) return pA - pB;
+      // 優先權相同時，維持原本時間排序 (不做額外處理)
+      return 0;
+    });
+    // ---------------------------
+
     renderTags([...tagSet]);
     renderMenu(allItems);
 
@@ -88,7 +118,17 @@ function renderTags(tags) {
   };
   tagFilter.appendChild(allBtn);
 
-  tags.forEach(tag => {
+  // 依照優先權排序標籤按鈕
+  const sortedTags = tags.sort((a, b) => {
+    const pA = TAG_PRIORITY[a] || 99;
+    const pB = TAG_PRIORITY[b] || 99;
+    
+    if (pA !== pB) return pA - pB;
+    // 優先權相同時，用字母排序確保順序固定
+    return a.localeCompare(b);
+  });
+
+  sortedTags.forEach(tag => {
     const btn = document.createElement("button");
     btn.textContent = `#${TAG_MAP[tag] || tag}`;
     btn.style.margin = "5px";
