@@ -333,6 +333,31 @@ main {
   left: 0;
 }
 
+/* 購物車紅點 */
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background-color: #ff4757;
+  color: white;
+  font-size: 0.75rem;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 99px;
+  padding: 0 4px;
+  font-weight: bold;
+  pointer-events: none;
+  border: 1px solid #fff;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cart-badge.bump {
+  transform: scale(1.4);
+}
+
 
 /* 手機版 */
 @media (max-width: 768px) {

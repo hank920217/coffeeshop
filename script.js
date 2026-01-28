@@ -212,8 +212,45 @@ function addToCart(item) {
   }
 
   localStorage.setItem("coffeeCart", JSON.stringify(cart));
-  alert(`已加入購物車：${item.name} (目前數量: ${existingItem ? existingItem.qty : 1})`);
+  
+  // 更新紅點不用 alert
+  updateCartBadge();
+  
+  // 讓紅點跳一下
+  const badge = document.querySelector(".cart-badge");
+  if(badge) {
+    badge.classList.add("bump");
+    setTimeout(() => badge.classList.remove("bump"), 200);
+  }
 }
+
+/* ========= 購物車紅點 (Global) ========= */
+function updateCartBadge() {
+  const cartLink = document.querySelector('a[href="cart.html"]');
+  if (!cartLink) return;
+
+  let cart = JSON.parse(localStorage.getItem("coffeeCart")) || [];
+  const totalQty = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
+
+  let badge = cartLink.querySelector(".cart-badge");
+  
+  if (totalQty > 0) {
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "cart-badge";
+      cartLink.appendChild(badge);
+    }
+    badge.innerText = totalQty;
+    badge.style.display = "flex";
+  } else {
+    if (badge) {
+      badge.style.display = "none";
+    }
+  }
+}
+
+// 頁面載入時初始化紅點
+updateCartBadge();
 
 /* ========= 渲染購物車 (Cart Page) ========= */
 function renderCart() {
@@ -263,6 +300,7 @@ function renderCart() {
 
   updateTotal(total);
   setupCartEvents(cart);
+  updateCartBadge(); // 同步更新紅點
 }
 
 // 供 HTML inline onclick 呼叫 (也可以用 addEventListener 綁定，但 inline 簡單點)
@@ -281,6 +319,7 @@ window.updateQty = function(index, change) {
   }
   localStorage.setItem("coffeeCart", JSON.stringify(cart));
   renderCart();
+  updateCartBadge(); // 同步更新紅點
 };
 
 function setupCartEvents(cart) {
