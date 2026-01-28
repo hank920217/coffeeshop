@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>購物車｜Moonlight Café</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="logo">Moonlight Café</div>
+    <nav class="nav">
+      <a href="index.html">首頁</a>
+      <a href="menu.html">菜單</a>
+      <a href="cart.html" class="active">購物車</a>
+      <a href="about.html">關於我們</a>
+      <span class="nav-indicator"></span>
+    </nav>
+  </header>
+
+  <main class="cart-page">
+    <h2>您的購物車</h2>
+
+    <div class="cart-container">
+      <div id="cartList" class="cart-list">
+        <!-- JS 會插入商品 -->
+        <p>載入購物車...</p>
+      </div>
+
+      <div class="cart-summary">
+        <div class="customer-info">
+          <h3>顧客資訊</h3>
+          <div class="form-group">
+            <label for="custName">姓名 (必填)</label>
+            <input type="text" id="custName" placeholder="請輸入您的姓名">
+          </div>
+          <div class="form-group">
+            <label for="custPhone">電話 (必填)</label>
+            <input type="tel" id="custPhone" placeholder="請輸入您的電話">
+          </div>
+        </div>
+
+        <p id="totalPrice" class="total-price">總金額：NT$ 0</p>
+        <button id="submitOrderBtn" class="btn btn-submit">送出訂單</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>📞 04-12345678｜📍 台灣某個溫暖角落</p>
+    <p>© 2026 Moonlight Café</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+
+  <script>
+    // Nav indicator logic
+    const nav = document.querySelector(".nav");
+    const indicator = document.querySelector(".nav-indicator");
+    const links = nav.querySelectorAll("a");
+
+    function moveIndicator(el) {
+      if (!el || !indicator) return;
+      const rect = el.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+
+      indicator.style.width = rect.width + "px";
+      indicator.style.left = rect.left - navRect.left + "px";
+    }
+
+    const activeLink = nav.querySelector(".active");
+    if (activeLink) moveIndicator(activeLink);
+
+    links.forEach(link => {
+      link.addEventListener("mouseenter", () => {
+        moveIndicator(link);
+      });
+    });
+
+    nav.addEventListener("mouseleave", () => {
+      if (activeLink) moveIndicator(activeLink);
+    });
+  </script>
+</body>
+
+</html>
