@@ -320,14 +320,14 @@ function renderCart() {
       <div class="cart-item-info">
         <img src="${item.imageUrls?.[0] || 'https://via.placeholder.com/100'}" alt="${item.name}">
         <div>
-          <h4>${item.name} <span style="font-size:0.9em; color:#8b5e3c;">x ${qty}</span></h4>
+          <h4>${item.name} <span class="item-qty-display">x ${qty}</span></h4>
           <p>單價: NT$ ${item.price} / 總計: NT$ ${subtotal}</p>
         </div>
       </div>
       <div class="cart-item-note">
         <input type="text" placeholder="備註 (例: 去冰、半糖)" value="${item.note || ''}" data-idx="${index}">
       </div>
-      <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
+      <div class="cart-item-actions">
         <div class="qty-controls">
            <button class="btn-qty" onclick="updateQty(${index}, -1)">-</button>
            <button class="btn-qty" onclick="updateQty(${index}, 1)">+</button>
@@ -426,7 +426,7 @@ async function submitOrder(cart) {
 
   // 2. 產生訂單編號 (0~500 循環)
   // 取得目前的編號，預設從 -1 開始，這樣第一筆會是 0
-  let currentId = parseInt(localStorage.getItem("lastOrderId") || "-1");
+  let currentId = parseInt(localStorage.getItem("lastOrderId") || "0");
   let newId = currentId + 1;
   
   if (newId > 500) {

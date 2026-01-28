@@ -673,3 +673,15 @@ main {
     text-align: center;
   }
 }
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.item-qty-display {
+  font-size: 0.9em;
+  color: #8b5e3c;
+}
