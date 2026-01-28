@@ -424,16 +424,6 @@ async function submitOrder(cart) {
     return;
   }
 
-  // 2. 產生訂單編號 (0~500 循環)
-  // 取得目前的編號，預設從 -1 開始，這樣第一筆會是 0
-  let currentId = parseInt(localStorage.getItem("lastOrderId") || "0");
-  let newId = currentId + 1;
-  
-  if (newId > 500) {
-    newId = 0;
-  }
-  
-  localStorage.setItem("lastOrderId", newId.toString());
 
   // 3. 準備訂單資料
   // 簡化回傳資訊
@@ -447,7 +437,6 @@ async function submitOrder(cart) {
   const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * (item.qty || 1)), 0);
 
   const orderData = {
-    orderId: newId,
     customer: {
       name: name,
       phone: phone
@@ -463,7 +452,7 @@ async function submitOrder(cart) {
     const docRef = await addDoc(collection(db, "cafe_orders"), orderData);
     
     console.log("Document written with ID: ", docRef.id);
-    alert(`訂單 #${newId} 已成功送出！\n總金額: $${totalAmount}`);
+    alert(`訂單已成功送出！\n總金額: $${totalAmount}`);
 
     // 5. 清空購物車與輸入框
     localStorage.removeItem("coffeeCart");
