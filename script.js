@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy }
+import { getFirestore, collection, getDocs, query, orderBy, addDoc }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const TAG_MAP = {
@@ -399,7 +399,7 @@ function updateTotal(amount) {
   }
 }
 
-function submitOrder(cart) {
+async function submitOrder(cart) {
   if (cart.length === 0) {
     alert("購物車是空的無法送出");
     return;
@@ -457,17 +457,26 @@ function submitOrder(cart) {
     timestamp: new Date().toISOString()
   };
 
-  console.log("送出訂單 JSON:", JSON.stringify(orderData, null, 2));
-  alert(`訂單 #${newId} 已送出！\n總金額: $${totalAmount}\n(請查看 Console 模擬後端接收)`);
+  try {
+    // 4. 傳送至 Firestore
+    // 使用 addDoc 自動生成文件 ID，並將 orderData 寫入 "cafe_orders" 集合
+    const docRef = await addDoc(collection(db, "cafe_orders"), orderData);
+    
+    console.log("Document written with ID: ", docRef.id);
+    alert(`訂單 #${newId} 已成功送出！\n總金額: $${totalAmount}`);
 
-  // 4. 清空購物車與輸入框
-  localStorage.removeItem("coffeeCart");
-  // 不清除 lastOrderId，因為要累加
-  renderCart(); // 這會清空列表，總金額歸零
-  
-  // 清空輸入框 (renderCart 會重繪整個 list 區域但 summary 是靜態的嗎? 
-  // 檢查 HTML 結構: .cart-summary 在 .cart-container 裡，renderCart 只清空 #cartList
-  // 所以我們要手動清空 input
-  if(nameInput) nameInput.value = "";
-  if(phoneInput) phoneInput.value = "";
+    // 5. 清空購物車與輸入框
+    localStorage.removeItem("coffeeCart");
+    // 不清除 lastOrderId，因為要累加
+    renderCart(); // 這會清空列表，總金額歸零
+    updateCartBadge(); // 更新紅點為 0
+    
+    // 清空輸入框
+    if(nameInput) nameInput.value = "";
+    if(phoneInput) phoneInput.value = "";
+
+  } catch (e) {
+    console.error("Error adding document: ", e);
+    alert("訂單送出失敗，請檢查網路連線或稍後再試。");
+  }
 }
