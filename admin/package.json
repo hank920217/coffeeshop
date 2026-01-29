@@ -1,0 +1,27 @@
+{
+  "name": "coffeeshop-website-backend-webpage",
+  "version": "1.0.0",
+  "description": "網頁連結\r https://ting0517.github.io/coffeeshop-website-backend-webpage/",
+  "main": "ai_generator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TING0517/coffeeshop-website-backend-webpage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/TING0517/coffeeshop-website-backend-webpage/issues"
+  },
+  "homepage": "https://github.com/TING0517/coffeeshop-website-backend-webpage#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
