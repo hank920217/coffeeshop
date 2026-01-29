@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy, addDoc }
+import { getFirestore, collection, getDocs, query, orderBy, addDoc, onSnapshot, doc }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const TAG_MAP = {
@@ -426,7 +426,6 @@ async function submitOrder(cart) {
 
 
   // 3. 準備訂單資料
-  // 簡化回傳資訊
   const simplifiedItems = cart.map(item => ({
     name: item.name,
     price: Number(item.price),
@@ -442,8 +441,9 @@ async function submitOrder(cart) {
       phone: phone
     },
     items: simplifiedItems,
-    total: totalAmount,
-    timestamp: new Date().toISOString()
+    total: Number(totalAmount),
+    order_status: 1, // 1: 餐廳已收到訂單
+    timestamp: Date.now() // 改用數值 (毫秒) 以利後端排序
   };
 
   try {
@@ -451,12 +451,10 @@ async function submitOrder(cart) {
     // 使用 addDoc 自動生成文件 ID，並將 orderData 寫入 "cafe_orders" 集合
     const docRef = await addDoc(collection(db, "cafe_orders"), orderData);
     
-    console.log("Document written with ID: ", docRef.id);
     alert(`訂單已成功送出！\n總金額: $${totalAmount}`);
 
     // 5. 清空購物車與輸入框
     localStorage.removeItem("coffeeCart");
-    // 不清除 lastOrderId，因為要累加
     renderCart(); // 這會清空列表，總金額歸零
     updateCartBadge(); // 更新紅點為 0
     
@@ -464,8 +462,102 @@ async function submitOrder(cart) {
     if(nameInput) nameInput.value = "";
     if(phoneInput) phoneInput.value = "";
 
+    // 6. 啟動即時監聽 (取代原本的模擬)
+    listenToOrder(docRef.id);
+
   } catch (e) {
     console.error("Error adding document: ", e);
     alert("訂單送出失敗，請檢查網路連線或稍後再試。");
+  }
+}
+
+/* ========= 訂單進度視窗 ========= */
+const ORDER_STATUSES = {
+  0: "訂單已取消",
+  1: "餐廳已收到訂單",
+  2: "餐點製作中",
+  3: "請前往取餐"
+};
+
+function listenToOrder(docId) {
+  let popup = document.getElementById("orderStatusPopup");
+  if (!popup) {
+    popup = document.createElement("div");
+    popup.id = "orderStatusPopup";
+    popup.className = "order-status-popup";
+    document.body.appendChild(popup);
+  }
+
+  // 先顯示初始狀態
+  updateOrderStatusUI(1);
+  popup.classList.add("active");
+
+  // 開始監聽 Firestore 文件變化
+  const unsub = onSnapshot(doc(db, "cafe_orders", docId), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const status = data.order_status !== undefined ? data.order_status : 1;
+      
+      // 更新 UI，並傳入取消訂閱的 function
+      updateOrderStatusUI(status, unsub);
+    }
+  });
+}
+
+function updateOrderStatusUI(code, unsubscribeFn) {
+  const popup = document.getElementById("orderStatusPopup");
+  if (!popup) return;
+
+  const msg = ORDER_STATUSES[code] || "處理中...";
+  const progressPercent = (code === 0) ? 100 : (code / 3) * 100;
+
+  // 根據狀態決定是否顯示按鈕 (0:取消, 3:完成)
+  let btnHtml = "";
+  if (code === 0 || code === 3) {
+    btnHtml = `<button id="popupConfirmBtn" style="
+      margin-top:10px; 
+      padding:6px 12px; 
+      border:none; 
+      border-radius:4px; 
+      background:#3e2f25; 
+      color:#fff; 
+      cursor:pointer;">
+      確認關閉
+    </button>`;
+  }
+
+  popup.innerHTML = `
+    <div class="order-status-title">
+      <span class="status-icon"></span>
+      目前訂單進度
+    </div>
+    <div class="order-status-msg">${msg}</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+    </div>
+    ${btnHtml}
+  `;
+
+  // 綁定按鍵事件
+  const btn = popup.querySelector("#popupConfirmBtn");
+  if (btn) {
+    btn.onclick = () => {
+      popup.classList.remove("active");
+      if (typeof unsubscribeFn === 'function') {
+        unsubscribeFn(); // 停止監聽
+      }
+    };
+  }
+
+  // 樣式調整
+  const icon = popup.querySelector(".status-icon");
+  const bar = popup.querySelector(".progress-bar-fill");
+  
+  if (code === 0) {
+    if(icon) icon.style.background = "#999";
+    if(bar) bar.style.background = "#999";
+  } else {
+    // 恢復正常顏色 (因為是 innerHTML 重繪，預設就是 CSS 的顏色，不需特別改回，除非之前是用 style 改的)
+    // 這裡我們都重繪了，所以不用擔心殘留樣式
   }
 }
