@@ -163,14 +163,12 @@ function renderMenu(items) {
     const card = document.createElement("div");
     card.className = "menu-item";
 
-    // 注意: 按鈕點擊事件要避免觸發卡片點擊 (stopPropagation)
     card.innerHTML = `
       <div class="menu-img-container">
         <img src="${imgUrl}" alt="${item.name}" class="menu-img-square" loading="lazy">
       </div>
       <div class="menu-info">
         <h3>${item.name}</h3>
-        <p class="menu-desc">${item.description || ""}</p>
         <p class="menu-price">NT$ ${item.price}</p>
         <button class="btn-add-cart">加入購物車</button>
       </div>
@@ -213,9 +211,17 @@ function openModal(item) {
   document.getElementById("modalPrice").innerText = `NT$ ${item.price}`;
   document.getElementById("modalDesc").innerHTML = (item.description || "").replace(/\n/g, "<br>");
 
-  // Modal 裡也可以有一個加入購物車
-  // 這裡先不加，維持原需求：浮現卡片左邊圖片右邊文字
-  // 若想加，可以在 modal-text 裡塞一個按鈕
+  // 綁定加入購物車按鈕
+  const addBtn = document.getElementById("modalAddBtn");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      addToCart(item);
+      // 簡單的視覺回饋
+      const originalText = addBtn.innerText;
+      addBtn.innerText = "已加入！";
+      setTimeout(() => addBtn.innerText = originalText, 1000);
+    };
+  }
 
   modal.classList.add("active");
 }
