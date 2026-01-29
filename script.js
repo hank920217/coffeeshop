@@ -160,11 +160,6 @@ function renderMenu(items) {
   items.forEach(item => {
     const imgUrl = item.imageUrls?.[0] || "https://via.placeholder.com/300";
 
-    // 截斷介紹文字 (如果不做 JS 截斷，也可以用 CSS line-clamp)
-    // 這裡示範簡單的 JS 截斷供參考，但 CSS 更理想
-    // let desc = item.description || "";
-    // if (desc.length > 50) desc = desc.slice(0, 50) + "...more";
-
     const card = document.createElement("div");
     card.className = "menu-item";
 
@@ -480,13 +475,8 @@ const ORDER_STATUSES = {
 };
 
 function listenToOrder(docId) {
-  let popup = document.getElementById("orderStatusPopup");
-  if (!popup) {
-    popup = document.createElement("div");
-    popup.id = "orderStatusPopup";
-    popup.className = "order-status-popup";
-    document.body.appendChild(popup);
-  }
+  createPopupIfNotExist();
+  const popup = document.getElementById("orderStatusPopup");
 
   // 先顯示初始狀態
   updateOrderStatusUI(1);
@@ -502,6 +492,15 @@ function listenToOrder(docId) {
       updateOrderStatusUI(status, unsub);
     }
   });
+}
+
+function createPopupIfNotExist() {
+  if (!document.getElementById("orderStatusPopup")) {
+    const popup = document.createElement("div");
+    popup.id = "orderStatusPopup";
+    popup.className = "order-status-popup";
+    document.body.appendChild(popup);
+  }
 }
 
 function updateOrderStatusUI(code, unsubscribeFn) {
